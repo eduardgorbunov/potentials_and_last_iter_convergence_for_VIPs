@@ -25,63 +25,74 @@ verbose = 1;
 %       \bar{x}^{k+1} = \bar{x}^k - 2gamma_k \bar{g}^k + \gamma_k g^{k-1}
 %
 
-% algorithm setup:
-N = 32;
-L = 1;
-R = 1; % this is the bound on ||x_0-x_*||^2
+Nmax = 60;
 
-gamma = @(k)(1/(2*L));
+for N = 1:Nmax
+    % algorithm setup:
+    L = 1;
+    R = 1; % this is the bound on ||x_0-x_*||^2
 
-% internal notation:
+    gamma = 1/(2*L);
 
-dimG    = N + 2;        % dimension of G
-nbPts   = N + 2; % this is x_*, x_0, ..., x_N
+    % internal notation:
 
-barxstar = zeros(dimG,1);
-bargstar = zeros(dimG,1);
+    dimG    = N + 2;        % dimension of G
+    nbPts   = N + 2; % this is x_*, x_0, ..., x_N
 
-barx0 = zeros(dimG, 1); barx0(1) = 1;
+    barxstar = zeros(dimG,1);
+    bargstar = zeros(dimG,1);
 
-bargk = zeros(dimG, N+1); bargk(2:end,:) = eye(N+1); % so that bargk(:,i) returns gradient of x_{i-1}
-barxk = zeros(dimG, N+1); barxk(:,1) = barx0;
+    barx0 = zeros(dimG, 1); barx0(1) = 1;
 
-ykminus1 = barx0; % this is for accelarated version
-barxk(:,2) = barxk(:,1) - gamma(1) * bargk(:,1);
-for i = 2:N
-    barxk(:,i+1) = barxk(:,i) - 2*gamma(i) * bargk(:,i) + gamma(i) * bargk(:,i-1);
-    %     yk           = barxk(:,i) - gamma * bargk(:,i);
-    %     barxk(:,i+1) = yk + (i-1)/(i+2) * (yk-ykminus1);
-    %     ykminus1 = yk;
-end
+    bargk = zeros(dimG, N+1); bargk(2:end,:) = eye(N+1); % so that bargk(:,i) returns gradient of x_{i-1}
+    barxk = zeros(dimG, N+1); barxk(:,1) = barx0;
 
-
-barx = [barxstar barxk];
-barg = [bargstar bargk];
-
-%% SDP
-
-% this uses YALMIP:
-G = sdpvar(dimG); % this defines a symmetric matrix variable, called G
-
-constraint = ( G >= 0); % G is PSD
-constraint = constraint + ( (barx0-barxstar)'*G*(barx0-barxstar) <= R^2);  % this is ||x_0-x_*||^2 <= R^2
-
-objective = (bargk(:,end))'*G*(bargk(:,end)); % this is \|F(x^N)\|^2
-
-% this is for the constraints on F
-for i = 2:nbPts
-    for j = 1:i
-        if i~=j %& (i - j <= 2 | j == 1 | j == 2 | i == nbPts)
-            constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barg(:,i) - barg(:,j)) - L^2 * (barx(:,i) - barx(:,j))'*G*(barx(:,i) - barx(:,j)) <= 0);
-            %  \|g^i - g^j\|^2 \leq L^2*\|x^i - x^j\|
-            constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barx(:,i) - barx(:,j)) >= 0);
-            %  <g^i - g^j, x^i - x^j> >= 0
+    ykminus1 = barx0; % this is for accelarated version
+    barxk(:,2) = barxk(:,1) - gamma * bargk(:,1);
+    for i = 2:N
+        barxk(:,i+1) = barxk(:,i) - 2*gamma * bargk(:,i) + gamma * bargk(:,i-1);
+        %     yk           = barxk(:,i) - gamma * bargk(:,i);
+        %     barxk(:,i+1) = yk + (i-1)/(i+2) * (yk-ykminus1);
+        %     ykminus1 = yk;
+    end
+    
+    
+    barx = [barxstar barxk];
+    barg = [bargstar bargk];
+    
+    %% SDP
+    
+    % this uses YALMIP:
+    G = sdpvar(dimG); % this defines a symmetric matrix variable, called G
+    
+    constraint = ( G >= 0); % G is PSD
+    constraint = constraint + ( (barx0-barxstar)'*G*(barx0-barxstar) <= R^2);  % this is ||x_0-x_*||^2 <= R^2
+    
+    objective = (bargk(:,end))'*G*(bargk(:,end)); % this is \|F(x^N)\|^2
+    
+    % this is for the constraints on F
+    for i = 2:nbPts
+        for j = 1:i
+            if i~=j & (i - j <= 8 | j == 1 | j == 2 | i == nbPts)
+                constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barg(:,i) - barg(:,j)) - L^2 * (barx(:,i) - barx(:,j))'*G*(barx(:,i) - barx(:,j)) <= 0);
+                %  \|g^i - g^j\|^2 \leq L^2*\|x^i - x^j\|
+                constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barx(:,i) - barx(:,j)) >= 0);
+                %  <g^i - g^j, x^i - x^j> >= 0
+            end
         end
     end
-end
-%
-
-options = sdpsettings('verbose',verbose);
-optimize(constraint,-objective,options);
-
-[double(objective)]
+    %
+    
+    options = sdpsettings('verbose',verbose);
+    optimize(constraint,-objective,options);
+    
+    double(objective)
+    
+    res_norm = double(objective);
+    save(strcat('dump/OG_norm_8_points_L_1_N_', sprintf('%d_', N), sprintf('_%f', gamma),'.mat'), 'res_norm', 'gamma');
+    
+    fprintf("======================================================\n");
+    fprintf("N = %d: ", N);
+    fprintf("||F(x^N)||^2 = %f\n", res_norm);
+    fprintf("======================================================\n");
+   end
