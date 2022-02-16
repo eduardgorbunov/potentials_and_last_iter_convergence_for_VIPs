@@ -1,21 +1,22 @@
 clear all; clc;
 %
-% In this example, we consider Optimistic gradient method:
-% w_{k+1} = w_k - 2 * gamma * F(w_k) + gamma * F(w_{k-1})
-
+% In this example, we consider Extragradient method:
+% w_{k+1} = w_k - gamma_2 * F(w_k - gamma_1 * F(w_k))
+% with gamma_2 = gamma_1 / 2
 %
 
-Nmax = 70;
+Nmax = 6;
 
-for N = 61:Nmax
+for N = 6:Nmax
     % (0) Initialize an empty PEP
     P=pep();
 
     % (1) Set up the class of monotone inclusions
     param.L  =  1; param.mu = 0; % F is 1-Lipschitz and 0-strongly monotone
 
-    gamma = 1/(2*param.L);
-    
+    gamma1 = 1/(2*param.L);
+    gamma2 = gamma1;
+
     F = P.DeclareFunction('LipschitzStronglyMonotone',param);
 
     % (2) Set up the starting points
@@ -28,12 +29,9 @@ for N = 61:Nmax
 
     w = cell(N+1,1);
     w{1} = w0;
-    g_prev = F.evaluate(w{1});
-    w{2} = w0 - gamma * g_prev;
-    for i = 2:N
-        g_current = F.evaluate(w{i});
-        w{i+1} = w{i} - 2 * gamma * g_current + gamma * g_prev;
-        g_prev = g_current;
+    for i = 1:N
+        w12 = w{i} - gamma1 * F.evaluate(w{i});
+        w{i+1} = w{i} - gamma2 * F.evaluate(w12);
     end
 
     % (4) Set up the performance measure: ||F(w_k)||^2
@@ -49,7 +47,7 @@ for N = 61:Nmax
     res_norm = double(squared_norm);
     res_init_dist = double((ws-w0)^2);
     
-    save(strcat('dump/OG_norm_L_1_N_', sprintf('%d_', N), sprintf('_%f', gamma),'.mat'), 'res_norm', 'gamma', 'res_init_dist');
+    save(strcat('dump/EG_norm_L_1_N_', sprintf('%d_', N), sprintf('_%f_', gamma1), sprintf('%f', gamma2),'.mat'), 'res_norm', 'gamma1', 'gamma2', 'res_init_dist');
 
     fprintf("======================================================\n");
     fprintf("N = %d: ", N);
