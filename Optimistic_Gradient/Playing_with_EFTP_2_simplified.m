@@ -29,13 +29,13 @@ verbose = 0;
 
 % algorithm setup:
 
-Nmax = 20;
+Nmax = 10;
 
 for N = Nmax:Nmax
-    L = 1;
+    L = 2;
     R = 1; % this is the bound on ||x_0-x_*||^2
 
-    gamma = 1/(2*L);
+    gamma = 1/(4*L);
 
     % internal notation:
 
@@ -74,10 +74,16 @@ for N = Nmax:Nmax
     for i = 2:nbPts
         for j = 1:i
             if i~=j & ((i ~= 3) | (i == 3 & j == 1)) & (i - j <= 2 | j == 1)
-                constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barg(:,i) - barg(:,j)) - L^2 * (barx(:,i) - barx(:,j))'*G*(barx(:,i) - barx(:,j)) <= 0);
-                %  \|g^i - g^j\|^2 \leq L^2*\|x^i - x^j\|
-                constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barx(:,i) - barx(:,j)) >= 0);
-                %  <g^i - g^j, x^i - x^j> >= 0
+                if ((mod(i,2) == 0) & (j == i-1) & (j ~= 1))% | ((mod(i,2) == 1) & (j == i-2) & (j ~= 1))
+                    constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barg(:,i) - barg(:,j)) - L^2 * (barx(:,i) - barx(:,j))'*G*(barx(:,i) - barx(:,j)) <= 0);
+                    %  \|g^i - g^j\|^2 \leq L^2*\|x^i - x^j\|
+                end
+                if ((mod(i,2) == 1) & (j == 1)) | ((mod(i,2) == 0) & (j == i-2) & (j ~= 1)) | ((i == 4) & (j == 1))
+                    constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barx(:,i) - barx(:,j)) >= 0);
+                    %  <g^i - g^j, x^i - x^j> >= 0
+                end
+                %constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barx(:,i) - barx(:,j)) >= 0);
+                    %  <g^i - g^j, x^i - x^j> >= 0
             end
         end
     end
@@ -89,7 +95,7 @@ for N = Nmax:Nmax
     [double(objective)]
     
     res_norm = double(objective);
-    %save(strcat('dump/EFTP_2_norm_L_1_N_', sprintf('%d_', N), sprintf('_%f', gamma),'.mat'), 'res_norm', 'gamma');
+    %save(strcat('dump/EFTP_2_simplified_V2_norm_L_1_N_', sprintf('%d_', N), sprintf('_%f', gamma),'.mat'), 'res_norm', 'gamma');
     
     fprintf("======================================================\n");
     fprintf("N = %d: ", N);
@@ -103,15 +109,19 @@ for N = Nmax:Nmax
     for i = 2:nbPts
         for j = 1:i
             if i~=j & ((i ~= 3) | (i == 3 & j == 1)) & (i - j <= 2 | j == 1)
-                index_constraints = index_constraints + 1;
-                fprintf("Lipschitzness at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
-                Lipschitzness_weights = [Lipschitzness_weights, dual(constraint(index_constraints))];
-                index_constraints = index_constraints + 1;
-                fprintf("Monotonicity  at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
-                monotonicity_weights = [monotonicity_weights, dual(constraint(index_constraints))];
+                if ((mod(i,2) == 0) & (j == i-1) & (j ~= 1)) %| ((mod(i,2) == 1) & (j == i-2) & (j ~= 1))
+                    index_constraints = index_constraints + 1;
+                    fprintf("Lipschitzness at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
+                    Lipschitzness_weights = [Lipschitzness_weights, dual(constraint(index_constraints))];
+                end
+                if ((mod(i,2) == 1) & (j == 1)) | ((mod(i,2) == 0) & (j == i-2) & (j ~= 1)) | ((i == 4) & (j == 1))
+                    index_constraints = index_constraints + 1;
+                    fprintf("Monotonicity  at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
+                    monotonicity_weights = [monotonicity_weights, dual(constraint(index_constraints))];
+                end
             end
         end
     end
-    save(strcat('dump/EFTP_2_dual_variables_L_1_N_', sprintf('%d_', N), sprintf('_%f', gamma),'.mat'), 'res_norm', 'gamma', 'monotonicity_weights', 'Lipschitzness_weights');
+    save(strcat('dump/EFTP_2_simplified_V2_dual_variables_L_', sprintf('%d_', L), sprintf('N_%d_', N), sprintf('_%f', gamma),'.mat'), 'res_norm', 'gamma', 'monotonicity_weights', 'Lipschitzness_weights');
     fprintf("======================================================\n");
 end

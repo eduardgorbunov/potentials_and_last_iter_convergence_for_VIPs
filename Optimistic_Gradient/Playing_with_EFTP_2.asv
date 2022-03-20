@@ -107,7 +107,7 @@ for N = Nmax:Nmax
                 fprintf("Lipschitzness at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
                 Lipschitzness_weights = [Lipschitzness_weights, dual(constraint(index_constraints))];
                 index_constraints = index_constraints + 1;
-                fprintf("Monotonicity  at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
+                fprintf("Monotonicity  at (%d, %d): %f\n", i, j, strtrim(rat(dual(constraint(index_constraints)))));
                 monotonicity_weights = [monotonicity_weights, dual(constraint(index_constraints))];
             end
         end

@@ -29,7 +29,7 @@ verbose = 0;
 
 % algorithm setup:
 
-Nmax = 20;
+Nmax = 3;
 
 for N = Nmax:Nmax
     L = 1;
@@ -63,28 +63,44 @@ for N = Nmax:Nmax
     %% SDP
 
     % this uses YALMIP:
-    G = sdpvar(dimG); % this defines a symmetric matrix variable, called G
+%     G = sdpvar(dimG); % this defines a symmetric matrix variable, called G
+    lambda_Lipschitz = sdpvar(nbPts,nbPts,'full');%there will be many zeros inside, but simple for notational convenience!
+    lambda_monotone  = sdpvar(nbPts,nbPts,'full');%there will be many zeros inside, but simple for notational convenience!
+    tau = sdpvar(1); % this is the multiplier for ||x_0-x_*||^2 <= R^2
+    
+%     constraint = ( G >= 0); % G is PSD
+%     constraint = constraint + ( (barx0-barxstar)'*G*(barx0-barxstar) <= R^2);  % this is ||x_0-x_*||^2 <= R^2
 
-    constraint = ( G >= 0); % G is PSD
-    constraint = constraint + ( (barx0-barxstar)'*G*(barx0-barxstar) <= R^2);  % this is ||x_0-x_*||^2 <= R^2
-
-    objective = (bargk(:,end))'*G*(bargk(:,end)); % this is \|F(x^N)\|^2
+    dual_PSD_matrix = tau * (barx0-barxstar)*(barx0-barxstar)' - (bargk(:,end))*(bargk(:,end))';
+    objective = tau;
+    
+%     objective = (bargk(:,end))'*G*(bargk(:,end)); % this is \|F(x^N)\|^2
 
     % this is for the constraints on F
     for i = 2:nbPts
         for j = 1:i
             if i~=j & ((i ~= 3) | (i == 3 & j == 1)) & (i - j <= 2 | j == 1)
-                constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barg(:,i) - barg(:,j)) - L^2 * (barx(:,i) - barx(:,j))'*G*(barx(:,i) - barx(:,j)) <= 0);
+%                 constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barg(:,i) - barg(:,j)) - L^2 * (barx(:,i) - barx(:,j))'*G*(barx(:,i) - barx(:,j)) <= 0);
                 %  \|g^i - g^j\|^2 \leq L^2*\|x^i - x^j\|
-                constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barx(:,i) - barx(:,j)) >= 0);
+                A = (barg(:,i) - barg(:,j))*(barg(:,i) - barg(:,j))'-L^2 * (barx(:,i) - barx(:,j))*(barx(:,i) - barx(:,j))';
+                A = 1/2 * (A+A');
+                dual_PSD_matrix = dual_PSD_matrix + lambda_Lipschitz(i,j) * A;
+                
+%                 constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barx(:,i) - barx(:,j)) >= 0);
                 %  <g^i - g^j, x^i - x^j> >= 0
+                A = (barg(:,i) - barg(:,j))*(barx(:,i) - barx(:,j))';
+                A = 1/2 * (A+A');
+                dual_PSD_matrix = dual_PSD_matrix - lambda_monotone(i,j) * A; % minus because of " ... >= 0 "
             end
         end
     end
     %
+    constraint = (lambda_Lipschitz>=0);
+    constraint = constraint + (lambda_monotone>=0);
+    constraint = constraint + (dual_PSD_matrix>=0);
     
     options = sdpsettings('verbose',verbose);
-    optimize(constraint,-objective,options);
+    optimize(constraint,objective,options);  % we minimize objectiv =tau <-- 
 
     [double(objective)]
     
@@ -97,21 +113,11 @@ for N = Nmax:Nmax
     fprintf("======================================================\n");
 
     fprintf("Dual variables\n");
-    index_constraints = 2;
-    monotonicity_weights = [];
-    Lipschitzness_weights = [];
-    for i = 2:nbPts
-        for j = 1:i
-            if i~=j & ((i ~= 3) | (i == 3 & j == 1)) & (i - j <= 2 | j == 1)
-                index_constraints = index_constraints + 1;
-                fprintf("Lipschitzness at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
-                Lipschitzness_weights = [Lipschitzness_weights, dual(constraint(index_constraints))];
-                index_constraints = index_constraints + 1;
-                fprintf("Monotonicity  at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
-                monotonicity_weights = [monotonicity_weights, dual(constraint(index_constraints))];
-            end
-        end
-    end
-    save(strcat('dump/EFTP_2_dual_variables_L_1_N_', sprintf('%d_', N), sprintf('_%f', gamma),'.mat'), 'res_norm', 'gamma', 'monotonicity_weights', 'Lipschitzness_weights');
-    fprintf("======================================================\n");
+    fprintf("\t Lipschitzness:\n")
+    double(lambda_Lipschitz)
+    fprintf("\t monotonicity:\n")
+    double(lambda_monotone)
+    
+    fprintf("\t PSD matrix:\n")
+    double(dual_PSD_matrix)
 end
