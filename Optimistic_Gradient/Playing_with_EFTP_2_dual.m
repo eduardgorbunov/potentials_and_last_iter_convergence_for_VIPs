@@ -76,6 +76,8 @@ for N = Nmax:Nmax
     
 %     objective = (bargk(:,end))'*G*(bargk(:,end)); % this is \|F(x^N)\|^2
 
+    constraint = (lambda_Lipschitz>=0);
+    constraint = constraint + (lambda_monotone>=0);
     % this is for the constraints on F
     for i = 2:nbPts
         for j = 1:i
@@ -91,12 +93,13 @@ for N = Nmax:Nmax
                 A = (barg(:,i) - barg(:,j))*(barx(:,i) - barx(:,j))';
                 A = 1/2 * (A+A');
                 dual_PSD_matrix = dual_PSD_matrix - lambda_monotone(i,j) * A; % minus because of " ... >= 0 "
+            else
+                constraint = constraint + (lambda_Lipschitz(i,j)==0);
+                constraint = constraint + (lambda_monotone(i,j)==0);
             end
         end
     end
     %
-    constraint = (lambda_Lipschitz>=0);
-    constraint = constraint + (lambda_monotone>=0);
     constraint = constraint + (dual_PSD_matrix>=0);
     
     options = sdpsettings('verbose',verbose);

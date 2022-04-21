@@ -29,13 +29,13 @@ verbose = 0;
 
 % algorithm setup:
 
-Nmax = 3;
+Nmax = 2;
 
 for N = Nmax:Nmax
     L = 1;
     R = 1; % this is the bound on ||x_0-x_*||^2
 
-    gamma = 1/(2*L);
+    gamma = 1/(4*L);
 
     % internal notation:
 

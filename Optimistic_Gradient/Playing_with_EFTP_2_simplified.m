@@ -29,10 +29,10 @@ verbose = 0;
 
 % algorithm setup:
 
-Nmax = 10;
+Nmax = 70;
 
 for N = Nmax:Nmax
-    L = 2;
+    L = 1;
     R = 1; % this is the bound on ||x_0-x_*||^2
 
     gamma = 1/(4*L);
@@ -95,14 +95,14 @@ for N = Nmax:Nmax
     [double(objective)]
     
     res_norm = double(objective);
-    %save(strcat('dump/EFTP_2_simplified_V2_norm_L_1_N_', sprintf('%d_', N), sprintf('_%f', gamma),'.mat'), 'res_norm', 'gamma');
+    save(strcat('dump/EFTP_2_simplified_V2_norm_L_1_N_', sprintf('%d_', N), sprintf('_%f', gamma),'.mat'), 'res_norm', 'gamma');
     
     fprintf("======================================================\n");
     fprintf("N = %d: ", N);
     fprintf("||F(x^N)||^2 = %f\n", res_norm);
     fprintf("======================================================\n");
 
-    fprintf("Dual variables\n");
+    %fprintf("Dual variables\n");
     index_constraints = 2;
     monotonicity_weights = [];
     Lipschitzness_weights = [];
@@ -111,17 +111,17 @@ for N = Nmax:Nmax
             if i~=j & ((i ~= 3) | (i == 3 & j == 1)) & (i - j <= 2 | j == 1)
                 if ((mod(i,2) == 0) & (j == i-1) & (j ~= 1)) %| ((mod(i,2) == 1) & (j == i-2) & (j ~= 1))
                     index_constraints = index_constraints + 1;
-                    fprintf("Lipschitzness at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
+                    %fprintf("Lipschitzness at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
                     Lipschitzness_weights = [Lipschitzness_weights, dual(constraint(index_constraints))];
                 end
                 if ((mod(i,2) == 1) & (j == 1)) | ((mod(i,2) == 0) & (j == i-2) & (j ~= 1)) | ((i == 4) & (j == 1))
                     index_constraints = index_constraints + 1;
-                    fprintf("Monotonicity  at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
+                    %fprintf("Monotonicity  at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
                     monotonicity_weights = [monotonicity_weights, dual(constraint(index_constraints))];
                 end
             end
         end
     end
-    save(strcat('dump/EFTP_2_simplified_V2_dual_variables_L_', sprintf('%d_', L), sprintf('N_%d_', N), sprintf('_%f', gamma),'.mat'), 'res_norm', 'gamma', 'monotonicity_weights', 'Lipschitzness_weights');
+    %save(strcat('dump/EFTP_2_simplified_V2_dual_variables_L_', sprintf('%d_', L), sprintf('N_%d_', N), sprintf('_%f', gamma),'.mat'), 'res_norm', 'gamma', 'monotonicity_weights', 'Lipschitzness_weights');
     fprintf("======================================================\n");
 end

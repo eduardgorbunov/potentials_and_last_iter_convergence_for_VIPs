@@ -1,4 +1,4 @@
-clear all; clc;
+clc; clear all;
 %
 % In this example, we consider Optimistic gradient method:
 % w_{k+1} = w_k - 2 * gamma * F(w_k) + gamma * F(w_{k-1})
@@ -6,7 +6,7 @@ clear all; clc;
 % (0) Initialize an empty PEP
 P=pep();
 
-N = 2; %number of iterations
+N = 10; %number of iterations
 
 % (1) Set up the class of monotone inclusions
 param.L  =  1; param.mu = 0; % F is 1-Lipschitz and 0-strongly monotone
@@ -14,7 +14,7 @@ param.L  =  1; param.mu = 0; % F is 1-Lipschitz and 0-strongly monotone
 
 
 
-gamma = 1/(4*param.L);
+gamma = 1/(2*param.L);
 %gamma = param.beta/4;
 
 F = P.DeclareFunction('LipschitzStronglyMonotone',param);
@@ -24,7 +24,7 @@ F = P.DeclareFunction('LipschitzStronglyMonotone',param);
 w0=P.StartingPoint();
 [ws, Fs] = F.OptimalPoint(); 
 
-P.InitialCondition((ws-w0)^2<=1);  % Normalize the initial distance ||w0-ws||^2 <= 1
+P.InitialCondition((ws-w0)^2 <= 1);  % Normalize the initial distance ||w0-ws||^2 <= 1
 
 % (3) Algorithm
 
@@ -32,15 +32,15 @@ w = cell(N+1,1);
 tw = cell(N+1,1);
 w{1} = w0;
 tw{1} = w0;
-%w{2} = w{1} - gamma * F.evaluate(tw{1});
-for i = 1:N
-    tw{i+1} = w{i} - gamma * F.evaluate(tw{i});
-    w{i+1} = w{i} - gamma * F.evaluate(tw{i+1});
+w{2} = w{1} - gamma * F.evaluate(tw{1});
+for i = 2:N
+    tw{i} = w{i} - gamma * F.evaluate(tw{i-1});
+    w{i+1} = w{i} - gamma * F.evaluate(tw{i});
 end
 
 % (4) Set up the performance measure: ||F(w_k)||^2
-squared_norm = (F.evaluate(w{N+1}))^2;
-norm_F_prev = (F.evaluate(w{N}))^2;
+squared_norm = (F.evaluate(w{N+1}))^2 + 2*(F.evaluate(w{N+1}) - F.evaluate(tw{N}))^2;
+norm_F_prev = (F.evaluate(w{N}))^2 + 2*(F.evaluate(w{N}) - F.evaluate(tw{N-1}))^2;
 P.PerformanceMetric(squared_norm - norm_F_prev);
 
 % (5) Solve the PEP
