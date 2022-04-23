@@ -25,14 +25,14 @@ verbose = 0;
 %       \bar{x}^{k+1} = \bar{x}^k - 2gamma_k \bar{g}^k + \gamma_k g^{k-1}
 %
 
-Nmax = 30;
+Nmax = 50;
 
-for N = 30:Nmax
+for N = Nmax:Nmax
     % algorithm setup:
     L = 1;
     R = 1; % this is the bound on ||x_0-x_*||^2
 
-    gamma = 1/(2*L);
+    gamma = 1/(5*L);
 
     % internal notation:
 
@@ -47,13 +47,9 @@ for N = 30:Nmax
     bargk = zeros(dimG, N+1); bargk(2:end,:) = eye(N+1); % so that bargk(:,i) returns gradient of x_{i-1}
     barxk = zeros(dimG, N+1); barxk(:,1) = barx0;
 
-    ykminus1 = barx0; % this is for accelarated version
     barxk(:,2) = barxk(:,1) - gamma * bargk(:,1);
     for i = 2:N
         barxk(:,i+1) = barxk(:,i) - 2*gamma * bargk(:,i) + gamma * bargk(:,i-1);
-        %     yk           = barxk(:,i) - gamma * bargk(:,i);
-        %     barxk(:,i+1) = yk + (i-1)/(i+2) * (yk-ykminus1);
-        %     ykminus1 = yk;
     end
     
     
@@ -73,7 +69,7 @@ for N = 30:Nmax
     % this is for the constraints on F
     for i = 2:nbPts
         for j = 1:i
-            if i~=j %& (i - j <= 2 | j == 1 | j == 2 | i == nbPts)
+            if i~=j
                 constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barg(:,i) - barg(:,j)) - L^2 * (barx(:,i) - barx(:,j))'*G*(barx(:,i) - barx(:,j)) <= 0);
                 %  \|g^i - g^j\|^2 \leq L^2*\|x^i - x^j\|
                 constraint = constraint + ( (barg(:,i) - barg(:,j))'*G*(barx(:,i) - barx(:,j)) >= 0);
@@ -89,22 +85,22 @@ for N = 30:Nmax
     double(objective)
     
     res_norm = double(objective);
-    %save(strcat('dump/OG_norm_2_points_L_1_N_', sprintf('%d_', N), sprintf('_%f', gamma),'.mat'), 'res_norm', 'gamma');
+    save(strcat('dump/OG_norm_L_1_N_', sprintf('%d_', N), sprintf('_%f', gamma),'.mat'), 'res_norm', 'gamma');
     
     fprintf("======================================================\n");
     fprintf("N = %d: ", N);
     fprintf("||F(x^N)||^2 = %f\n", res_norm);
-    fprintf("Dual variables\n");
-    index_constraints = 2;
-    for i = 2:nbPts
-        for j = 1:i
-            if i~=j %& (i - j <= 2 | j == 1 | j == 2 | i == nbPts)
-                index_constraints = index_constraints + 1;
-                fprintf("Lipschitzness at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
-                index_constraints = index_constraints + 1;
-                fprintf("Monotonicity  at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
-            end
-        end
-    end
+    %fprintf("Dual variables\n");
+    %index_constraints = 2;
+    %for i = 2:nbPts
+    %    for j = 1:i
+    %        if i~=j
+    %            index_constraints = index_constraints + 1;
+    %            %fprintf("Lipschitzness at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
+    %            index_constraints = index_constraints + 1;
+    %            %fprintf("Monotonicity  at (%d, %d): %f\n", i, j, dual(constraint(index_constraints)));
+    %        end
+    %    end
+    %end
     fprintf("======================================================\n");
    end
