@@ -27,9 +27,21 @@
 % when A_{k+1} = A_k + 1/8. The expression should always be <= 0 for
 % verifying the identity from Theorem 1 (with gamma<=1/4/L and A_k>=4/3).
 % In the code below, we use k = 2 for notational convenience.
+
 clear all; clc;
-L = 1; gamma = 1/4/L; verbose = 2;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% parameters: MODIFY HERE!
+
+% pick the parameters for which you want to verify
+% the inequality (numerically)
+L = 1;
+gamma = 1/4/L;
 A2 = 20000;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+verbose = 2;
 tolerance = 1e-8;
 
 % (0) Initialize an empty PEP

@@ -25,9 +25,15 @@
 
 clear all; clc;
 
-% parameters
-L = 1; gamma = 10;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% parameters: MODIFY HERE!
 
+% pick the parameters for which you want to verify
+% the inequality (numerically)
+L = 1;
+gamma = 10; 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 verbose = 1;
 tolerance = 1e-6;
 

@@ -25,9 +25,21 @@
 % when A_{k+1} = A_k + 1/3. The expression should always be <= 0 for
 % verifying the identity from Theorem 1 (with gamma<=1/3/L and A_k>=32/3).
 % In the code below, we use k = 1 for notational convenience.
+
 clear all; clc;
-L = 1; gamma = 1/3/L; verbose = 2;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% parameters: MODIFY HERE!
+
+% pick the parameters for which you want to verify
+% the inequality (numerically)
+L = 1;
+gamma = 1/3/L; 
 A1 = 10;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+verbose = 2;
 tolerance = 1e-8;
 
 % (0) Initialize an empty PEP
