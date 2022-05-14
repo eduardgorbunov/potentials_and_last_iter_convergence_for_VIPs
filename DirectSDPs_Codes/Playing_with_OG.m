@@ -3,8 +3,8 @@ verbose = 0;
 %
 %   find x^* such that F(x^*) = 0   with F: L-Lip. and monotone
 %
-%   x^1 = x^0 - \gamma_0 g^0
-%   x^{k+1} = x^k - 2gamma_k g^k + \gamma_k g^{k-1}   with g^k = F(x^k)
+%   x^1 = x^0 - gamma_0 g^0
+%   x^{k+1} = x^k - 2gamma_k g^k + gamma_k g^{k-1}   with g^k = F(x^k)
 %
 %
 %   we study worst-case behavior of \|F(x^N)\|^2  (\|g^N\|^2)
@@ -12,7 +12,7 @@ verbose = 0;
 %
 %
 %   Let's PEP-it!
-%   - P = [ x0 g0 g1 ... gN ]   and G = P^T P
+%   - P = [ x^0 g^0 g^1 ... g^N ]   and G = P^T P
 %
 %   Define a few things for simplifying the code:
 %   - \bar{x}^k :  x^k = P \bar{x}^k   (with k\in\{*,0,...N\})
@@ -22,7 +22,7 @@ verbose = 0;
 %                   = \bar{g}^i^T G \bar{x}^k
 %                   = Trace (G \bar{x}^k \bar{g}^i^T )
 %  second:
-%       \bar{x}^{k+1} = \bar{x}^k - 2gamma_k \bar{g}^k + \gamma_k g^{k-1}
+%       \bar{x}^{k+1} = \bar{x}^k - 2gamma_k \bar{g}^k + gamma_k g^{k-1}
 %
 
 Nmax = 50;
@@ -37,7 +37,7 @@ for N = Nmax:Nmax
     % internal notation:
 
     dimG    = N + 2;        % dimension of G
-    nbPts   = N + 2; % this is x_*, x_0, ..., x_N
+    nbPts   = N + 2; % this is x^*, x^0, ..., x^N
 
     barxstar = zeros(dimG,1);
     bargstar = zeros(dimG,1);

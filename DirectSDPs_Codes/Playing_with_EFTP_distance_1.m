@@ -3,8 +3,8 @@ verbose = 0;
 %
 %   find x^* such that F(x^*) = 0   with F: L-Lip. and monotone
 %
-%   tx^{k+1} = x^k - \gamma_k g^k  with g^k = F(tx^k)
-%   x^{k+1} = x^k - gamma_k tg^k    with tg^k = F(tx^{k+1})
+%   tx^{k}  = x^k - gamma_k tg^{k-1}  with tg^{k-1} = F(tx^{k-1})
+%   x^{k+1} = x^k - gamma_k tg^k      with tg^k     = F(tx^{k})
 %
 %
 %   we study worst-case behavior of \|F(x^N)\|^2  (\|g^N\|^2)
@@ -12,7 +12,7 @@ verbose = 0;
 %
 %
 %   Let's PEP-it!
-%   - P = [ x0 tg0 g0 tg1 g1 ... tgN gN ]   and G = P^T P
+%   - P = [ x^0 g^0 tg^0 g^1 tg^1 ... g^N ]   and G = P^T P
 %
 %   Define a few things for simplifying the code:
 %   - \bar{x}^k :  x^k = P \bar{x}^k   (with k\in\{*,0,...N\})
@@ -40,7 +40,7 @@ for N = Nmax:Nmax
     % internal notation:
 
     dimG    = 2*N + 2;        % dimension of G
-    nbPts   = 2*N + 2; % this is x_*, x_0, tx1, x_1, tx_2, x_2 ..., tx_N, x_N
+    nbPts   = 2*N + 2; % this is x^*, x^0, tx^0, x^1, tx^1, ..., tx^{N-1}, x^N
 
     barxstar = zeros(dimG,1);
     bargstar = zeros(dimG,1);
