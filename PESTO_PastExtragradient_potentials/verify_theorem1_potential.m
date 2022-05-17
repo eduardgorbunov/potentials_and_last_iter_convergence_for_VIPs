@@ -1,7 +1,7 @@
 %
 % This code aims at verifying (numerically) the first inequality from
 % Theorem 1 of the paper
-%   "List-Iterate Convergence of Optimistic Gradient Method for Monotone
+%   "Last-Iterate Convergence of Optimistic Gradient Method for Monotone
 %       Variationnal Inequalities".
 %
 % PROBLEM SETUP:
@@ -40,7 +40,7 @@ A1 = 10;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 verbose = 2;
-tolerance = 1e-8;
+tolerance = 1e-5;
 
 % (0) Initialize an empty PEP
 P=pep();

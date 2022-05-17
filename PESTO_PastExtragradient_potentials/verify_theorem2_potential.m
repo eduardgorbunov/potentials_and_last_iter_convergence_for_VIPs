@@ -1,12 +1,12 @@
 %
 % This code aims at verifying (numerically) the first inequality from
 % Theorem 2 of the paper
-%   "List-Iterate Convergence of Optimistic Gradient Method for Monotone
+%   "Last-Iterate Convergence of Optimistic Gradient Method for Monotone
 %       Variationnal Inequalities".
 %
 % PROBLEM SETUP:
 % Consider the problem of finding a zero of a monotone Lipschitz operator:
-%       find x\in Q such that F(x) = 0
+%       find x\in Q such that <F(x);y-x> >= 0 (for all y\in Q)
 % where F is monotone and L-Lipschitz, and Q is convex & compact.
 %
 % ALGORITHM: 
@@ -25,7 +25,7 @@
 %           - ||x^{k} - x^* ||^2 - 1/16 || tx^{k-1} - tx^{k-2} ||^2 
 %           - A_k * p_k
 % when A_{k+1} = A_k + 1/8. The expression should always be <= 0 for
-% verifying the identity from Theorem 1 (with gamma<=1/4/L and A_k>=4/3).
+% verifying the identity from Theorem 2 (with gamma<=1/4/L and A_k>=4/3).
 % In the code below, we use k = 2 for notational convenience.
 
 clear all; clc;
@@ -42,16 +42,18 @@ A2 = 20000;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 verbose = 2;
-tolerance = 1e-8;
+tolerance = 1e-5;
 
 % (0) Initialize an empty PEP
 P=pep();
 
 % (1) Set up the problem class
 paramF.L  =  L; paramF.mu = 0; % F is 1-Lipschitz and 0-strongly monotone
-F = P.DeclareFunction('LipschitzStronglyMonotone',paramF);
+F       = P.DeclareFunction('LipschitzStronglyMonotone',paramF);
+Ind     = P.DeclareFunction('ConvexIndicator'); % indicator of Q
 
-xs  = F.OptimalPoint();  % this is some x^*
+Ftot = F+Ind;
+xs  = Ftot.OptimalPoint();  % this is some x^*
 
 % (2) Set up the starting points
 tx0 = P.StartingPoint(); % this is tx^01
@@ -59,13 +61,13 @@ x1  = P.StartingPoint(); % this is x^1
 
 Ftx0    = F.gradient(tx0);
 Fx1     = F.gradient(x1);
-tx1     = x1 - gamma * Ftx0; 
+tx1     = projection_step(x1 - gamma * Ftx0,Ind); 
 Ftx1    = F.gradient(tx1);
-x2      = x1 - gamma * Ftx1;
+x2      = projection_step(x1 - gamma * Ftx1,Ind);
 Fx2     = F.gradient(x2);
-tx2     = x2 - gamma * Ftx1;
+tx2     = projection_step(x2 - gamma * Ftx1,Ind);
 Ftx2    = F.gradient(tx2);
-x3      = x2 - gamma * Ftx2;
+x3      = projection_step(x2 - gamma * Ftx2,Ind);
 Fx3     = F.gradient(x3);
 
 

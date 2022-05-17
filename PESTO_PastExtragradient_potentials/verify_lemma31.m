@@ -1,7 +1,7 @@
 %
 % This code aims at verifying (numerically) the inequality from
 % Lemma 3.1 of the paper
-%   "List-Iterate Convergence of Optimistic Gradient Method for Monotone
+%   "Last-Iterate Convergence of Optimistic Gradient Method for Monotone
 %       Variationnal Inequalities".
 %
 % PROBLEM SETUP:
@@ -31,11 +31,11 @@ clear all; clc;
 % pick the parameters for which you want to verify
 % the inequality (numerically)
 L = 1;
-gamma = 10; 
+gamma = 1/10; 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 verbose = 1;
-tolerance = 1e-6;
+tolerance = 1e-5;
 
 % (0) Initialize an empty PEP
 P=pep();
@@ -59,11 +59,11 @@ p1 = Fx1^2 + 2 * ( Fx1 - Ftx0 )^2;
 p2 = Fx2^2 + 2 * ( Fx2 - Ftx1 )^2;
 residual = 3 * (L*gamma^2 - 2/9) * ( Ftx1 - Ftx0 )^2;
 % (4) Set up the performance measure:
-expression = p2 - p1 - residual;
+expression_to_verify = p2 - p1 - residual;
 P.PerformanceMetric(expression_to_verify);
 
 % (5) Solve the PEP
 P.solve(verbose)
 
 % (6) is the potential verified?
-fprintf('Is the potential verified to tolerance? [0/1]: %d\n',double(expression)<tolerance)
+fprintf('Is the potential verified to tolerance? [0/1]: %d\n',double(expression_to_verify)<tolerance)

@@ -1,12 +1,12 @@
 %
 % This code aims at verifying (numerically) the inequality from
 % Lemma 4.1 of the paper
-%   "List-Iterate Convergence of Optimistic Gradient Method for Monotone
+%   "Last-Iterate Convergence of Optimistic Gradient Method for Monotone
 %       Variationnal Inequalities".
 %
 % PROBLEM SETUP:
 % Consider the problem of finding a zero of a monotone Lipschitz operator:
-%       find x\in Q such that F(x) = 0
+%       find x\in Q such that <F(x);y-x> >= 0 (for all y\in Q)
 % where F is monotone and L-Lipschitz, and Q is convex & compact.
 %
 % ALGORITHM: 
@@ -20,9 +20,8 @@
 % Denotes p_k := ||x^k - x^{k-1}||^2 
 %                + || x^k - x^{k-1} - 2 gamma * (F(x^k) - F(tx^{k-1})) ||^2 ;
 % the code compute the maximum (i.e., worst-case) value of
-%    p_{k+1} - p_k 
-%       + (1-5*L^2*gamma^2) ||x^{k+1}-tx^k||^2 + ||F(x^{k+1})-F(tx^k)||^2
-
+%  p_{k+1} - p_k 
+%   + (1-5*L^2*gamma^2) ||x^{k+1}-tx^k||^2 + gamma^2* ||F(x^{k+1})-F(tx^k)||^2
 % which should always be <= 0 for verifying the identity from Lemma 4.1.
 % In the code below, we use k = 1 for notational convenience.
 
@@ -40,7 +39,7 @@ gamma = 10;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 verbose = 1;
-tolerance = 1e-6;
+tolerance = 1e-5;
 
 % (0) Initialize an empty PEP
 P=pep();
@@ -65,7 +64,7 @@ Fx2     = F.gradient(x2);
 
 p1 = (x1-x0)^2 + (x1-x0-2*gamma*(Fx1-Ftx0))^2;
 p2 = (x2-x1)^2 + (x2-x1-2*gamma*(Fx2-Ftx1))^2;
-residual = (1-5*L^2*gamma^2)*(x2-tx1)^2 + (Fx2-Ftx1)^2;
+residual = (1-5*L^2*gamma^2)*(x2-tx1)^2 + gamma^2*(Fx2-Ftx1)^2;
 % (4) Set up the performance measure:
 expression_to_verify = p2 - p1 + residual;
 P.PerformanceMetric(expression_to_verify);
