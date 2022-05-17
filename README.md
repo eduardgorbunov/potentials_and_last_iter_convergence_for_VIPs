@@ -9,9 +9,9 @@ Date:    May 2022
 ## Requirements
 
 **Packages.** 
-- To run our MATLAB code one should install Performance Estimation Toolbox (PESTO) https://github.com/AdrienTaylor/Performance-Estimation-Toolbox, SEDUMI https://yalmip.github.io/solver/sedumi/ (or any other appropriate SDP solver), YALMIP https://yalmip.github.io/ and add the to the path when executing our code.
+- To run our MATLAB code one should install [Performance Estimation Toolbox (PESTO)](https://github.com/AdrienTaylor/Performance-Estimation-Toolbox), [SEDUMI](https://yalmip.github.io/solver/sedumi/)  (or any other appropriate SDP solver interfaced with YALMIP), [YALMIP](https://yalmip.github.io/) and add the to the path when executing our code.
 - The Python codes for visualization require Jupyter notebooks.
-- The Python codes for numerical verifications require Jupyter notebooks and PEPit (Performance Estimation in Python).
+- The Python codes for numerical verifications require Jupyter notebooks and [PEPit](https://github.com/PerformanceEstimation/PEPit) (Performance Estimation in Python).
 
 ## Organization of the code
 
