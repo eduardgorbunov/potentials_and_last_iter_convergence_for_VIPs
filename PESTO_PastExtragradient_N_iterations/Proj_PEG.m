@@ -12,20 +12,13 @@ function [worstcase] = Proj_PEG(gamma,L,N,verbose)
 % then run for k=1,...,N-1:
 %   tx^k    = Proj_Q[ x^k - gamma * F(tx^{k-1}) ]
 %   x^{k+1} = Proj_Q[ x^k - gamma * F(tx^k)     ]
-% ---------
-% When init = 'distance':
+%
+%
 % The code computes the worst-case ratio
 %       ||x^N-x^{N-1}||^2 /||x^0-x^*||^2,
 % where x^* is a solution to the inclusion problem: F(x^*) = 0.
 % This corresponds to computing the worst-case value of
 % ||x^N-x^{N-1}||^2 when ||x^0 - x^*||^2 == 1.
-% ---------
-% When init = 'H0'
-% The code computes the worst-case ratio
-%       ||x^N-x^{N-1}||^2 /H0^2,
-% where x^* is a solution to the inclusion problem: F(x^*) = 0.
-% This corresponds to computing the worst-case value of
-% ||x^N-x^{N-1}||^2 when H0^2 == 1.
 
 % (0) Initialize an empty PEP
 P=pep();
